@@ -1,0 +1,43 @@
+# It's recommended to group all the resources/objects related to a microservice
+# in a single YAML file (separated by --- in YAML).
+#
+# It's also recommended to declare service first and then deployment, so that
+# the scheduler can spread the pods associated with the service as they're created
+# by the controller(s), such as Deployment object.
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-svc
+  labels:
+    app: webapp
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30080
+  selector:
+    app: webapp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-deployment
+spec:
+  selector:
+    matchLabels:
+      app: webapp
+  replicas: 2
+  # create pods using following template
+  template:
+    metadata:
+      # note: name is not needed here.
+      # unique name is generated using deploymet name.
+      labels:
+        app: webapp
+    spec:
+      containers:
+        - name: webapp
+          image: hello-world:0.1
+          ports:
+            - containerPort: 8080
